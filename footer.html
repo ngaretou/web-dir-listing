@@ -1,0 +1,369 @@
+</div> <!-- End #raw-listing -->
+
+<footer id="footer-text">&copy; 2026 &mdash; Foundational LLC &mdash; res.sng.al</footer>
+
+<script>
+(function() {
+    /* 1. I18N / TRANSLATIONS HELPER */
+    var defaultDict = {
+        en: {
+            _name: "English",
+            pageTitle: "Resources",
+            home: "Home",
+            searchPlaceholder: "Search files...",
+            loading: "Loading resources...",
+            noFiles: "No files found in this directory.",
+            folderBadge: "Folder",
+            parentDir: "Parent Directory",
+            upBadge: "Up",
+            download: "Download",
+            footerText: "\u00A9 2026 \u2014 Foundational LLC \u2014 res.sng.al"
+        },
+        fr: {
+            _name: "Fran\u00E7ais",
+            pageTitle: "Ressources",
+            home: "Accueil",
+            searchPlaceholder: "Rechercher des fichiers...",
+            loading: "Chargement des ressources...",
+            noFiles: "Aucun fichier trouv\u00E9 dans ce dossier.",
+            folderBadge: "Dossier",
+            parentDir: "Dossier parent",
+            upBadge: "Retour",
+            download: "T\u00E9l\u00E9charger",
+            footerText: "\u00A9 2026 \u2014 Foundational LLC \u2014 res.sng.al"
+        }
+    };
+
+    var dict = (typeof window !== "undefined" && window.DIR_TRANSLATIONS) || defaultDict;
+
+    var currentLang = "en";
+    try {
+        if (typeof window.getDirectoryLanguage === "function") {
+            currentLang = window.getDirectoryLanguage();
+        } else if (typeof localStorage !== "undefined" && localStorage && typeof localStorage.getItem === "function") {
+            currentLang = localStorage.getItem("lang") || "en";
+        }
+    } catch (e) {}
+
+    function t(key) {
+        var langData = dict[currentLang] || dict.en || defaultDict.en;
+        return langData[key] || defaultDict.en[key] || "";
+    }
+
+    /* 2. CLEAN SVG ICONS */
+    var icons = {
+        folder: '<svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>',
+        parent: '<svg viewBox="0 0 24 24" fill="var(--accent)"><path d="M11 9l1.42 1.42L8.83 14H18v2H8.83l3.59 3.58L11 21l-6-6 6-6zm9-5v2H4V4h16z"/></svg>',
+        zip: '<svg viewBox="0 0 24 24" fill="#8b5cf6"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2v2h-4V4h4zm-3 8h2v2h-2v-2zm0-2h2V8h-2v2zm0 4h2v2h-2v-2zm-7 6V8h3v12H4zm16 0h-3V8h3v12z"/></svg>',
+        audio: '<svg viewBox="0 0 24 24" fill="#ec4899"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>',
+        video: '<svg viewBox="0 0 24 24" fill="#ef4444"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>',
+        image: '<svg viewBox="0 0 24 24" fill="#10b981"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>',
+        document: '<svg viewBox="0 0 24 24" fill="#3b82f6"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>',
+        data: '<svg viewBox="0 0 24 24" fill="#64748b"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>'
+    };
+
+    var extMap = {
+        pdf: icons.document,
+        txt: icons.document,
+        amynotes: icons.document,
+        mp3: icons.audio,
+        wav: icons.audio,
+        mov: icons.video,
+        mp4: icons.video,
+        webm: icons.video,
+        jpg: icons.image,
+        jpeg: icons.image,
+        png: icons.image,
+        gif: icons.image,
+        zip: icons.zip,
+        dic: icons.zip,
+        acc2: icons.data
+    };
+
+    function getIcon(name, isDir) {
+        if (isDir) return icons.folder;
+        var ext = name.split('.').pop().toLowerCase();
+        return extMap[ext] || icons.document;
+    }
+
+    /* 3. THEME TOGGLE (Sun / Moon SVGs) */
+    var moonSvg = '<svg viewBox="0 0 24 24"><path d="M12.3 2a10 10 0 0 0-.19 20 10 10 0 0 0 9.89-8.5 1 1 0 0 0-1.19-1.14 7.97 7.97 0 0 1-2.4.37 8 8 0 0 1-8-8c0-.85.13-1.67.38-2.43a1 1 0 0 0-1.15-1.19A10.1 10.1 0 0 0 12.3 2z"/></svg>';
+    var sunSvg = '<svg viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0V3a1 1 0 0 0-1-1zm0 18a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1zm10-9h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0-2zM4 11H2a1 1 0 0 0 0 2h2a1 1 0 0 0 0-2zm14.07-6.07a1 1 0 0 0-1.41 0l-1.42 1.41a1 1 0 1 0 1.42 1.42l1.41-1.42a1 1 0 0 0 0-1.41zM6.76 16.24a1 1 0 0 0-1.42 0l-1.41 1.42a1 1 0 1 0 1.41 1.41l1.42-1.41a1 1 0 0 0 0-1.42zm11.31 1.42-1.41-1.42a1 1 0 0 0-1.42 1.42l1.42 1.41a1 1 0 0 0 1.41-1.41zM6.76 7.76a1 1 0 0 0 0-1.42L5.34 4.93a1 1 0 1 0-1.41 1.41l1.41 1.42a1 1 0 0 0 1.42 0z"/></svg>';
+
+    var root = document.documentElement;
+    var themeToggleBtn = document.getElementById("theme-toggle");
+    
+    function updateThemeIcon() {
+        if (!themeToggleBtn) return;
+        themeToggleBtn.innerHTML = root.classList.contains("dark") ? sunSvg : moonSvg;
+    }
+    updateThemeIcon();
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener("click", function() {
+            root.classList.toggle("dark");
+            try {
+                localStorage.setItem("theme", root.classList.contains("dark") ? "dark" : "light");
+            } catch (e) {}
+            updateThemeIcon();
+        });
+    }
+
+    /* 4. CUSTOM STYLED LANGUAGE DROPDOWN */
+    var dropdown = document.getElementById("lang-dropdown");
+    var trigger = document.getElementById("lang-trigger");
+    var currentLabel = document.getElementById("lang-current-label");
+    var menu = document.getElementById("lang-menu");
+
+    var checkSvg = '<span class="dropdown-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>';
+
+    function setupCustomDropdown() {
+        if (!menu || !dict) return;
+        menu.innerHTML = "";
+        
+        var activeName = (dict[currentLang] && dict[currentLang]._name) || currentLang.toUpperCase();
+        if (currentLabel) {
+            currentLabel.textContent = activeName;
+        }
+
+        Object.keys(dict).forEach(function(code) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "dropdown-item" + (code === currentLang ? " active" : "");
+            btn.setAttribute("role", "menuitem");
+            
+            var name = (dict[code] && dict[code]._name) || code.toUpperCase();
+            btn.innerHTML = '<span>' + name + '</span>' + (code === currentLang ? checkSvg : '');
+
+            btn.addEventListener("click", function(e) {
+                e.stopPropagation();
+                currentLang = code;
+                try {
+                    localStorage.setItem("lang", currentLang);
+                } catch (err) {}
+                if (dropdown) dropdown.classList.remove("open");
+                if (trigger) trigger.setAttribute("aria-expanded", "false");
+                setupCustomDropdown();
+                renderUI();
+            });
+
+            menu.appendChild(btn);
+        });
+    }
+
+    if (trigger && dropdown) {
+        trigger.addEventListener("click", function(e) {
+            e.stopPropagation();
+            var isOpen = dropdown.classList.toggle("open");
+            trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        document.addEventListener("click", function(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove("open");
+                trigger.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape" && dropdown.classList.contains("open")) {
+                dropdown.classList.remove("open");
+                trigger.setAttribute("aria-expanded", "false");
+                trigger.focus();
+            }
+        });
+
+        setupCustomDropdown();
+    }
+
+    /* 5. PARSE RAW APACHE DIRECTORY LISTING */
+    var raw = document.getElementById("raw-listing");
+    var list = document.getElementById("file-list");
+    var parsedItems = [];
+
+    if (raw) {
+        var links = Array.prototype.slice.call(raw.querySelectorAll("a"));
+        var ignoreHrefs = ["?C=N;O=D", "?C=M;O=A", "?C=S;O=A", "?C=D;O=A", "/", "#"];
+        var ignoreNames = ["Name", "Last modified", "Size", "Description", "header.html", "footer.html", ".htaccess", "htaccess", "list.html", "tinyindex.html", "translations.js", "favicon.svg"];
+
+        links.forEach(function(a) {
+            var href = a.getAttribute("href") || "";
+            var rawName = a.textContent.trim();
+
+            if (!href || href.startsWith("?") || ignoreHrefs.indexOf(href) !== -1 || ignoreNames.indexOf(rawName) !== -1) {
+                return;
+            }
+
+            var isParent = rawName === "Parent Directory" || href === "/" || href.endsWith("/../") || href === "..";
+            var isDir = isParent || href.endsWith("/") || rawName.endsWith("/");
+            var displayName = isParent ? "" : rawName.replace(/\/$/, "");
+
+            var date = "";
+            var size = "";
+
+            var tr = a.closest("tr");
+            if (tr) {
+                var tds = Array.prototype.slice.call(tr.querySelectorAll("td"));
+                if (tds.length >= 3) {
+                    date = (tds[tds.length - 3] && tds[tds.length - 3].textContent || "").trim();
+                    size = (tds[tds.length - 2] && tds[tds.length - 2].textContent || "").trim();
+                }
+            } else {
+                var textNode = a.nextSibling;
+                if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                    var text = textNode.textContent.trim();
+                    var match = text.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\s+([0-9\.\-A-Za-z]+)/);
+                    if (match) {
+                        date = match[1];
+                        size = match[2];
+                    }
+                }
+            }
+
+            parsedItems.push({
+                rawName: rawName,
+                name: displayName,
+                url: href,
+                isDir: isDir,
+                isParent: isParent,
+                date: date,
+                rawSize: size
+            });
+        });
+
+        parsedItems.sort(function(a, b) {
+            if (a.isParent) return -1;
+            if (b.isParent) return 1;
+            if (a.isDir && !b.isDir) return -1;
+            if (!a.isDir && b.isDir) return 1;
+            return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+        });
+    }
+
+    /* 6. RENDER ALL TEXTUAL & UI ELEMENTS */
+    function renderUI() {
+        if (currentLabel) {
+            var activeName = (dict[currentLang] && dict[currentLang]._name) || currentLang.toUpperCase();
+            currentLabel.textContent = activeName;
+        }
+
+        // Breadcrumbs & Title
+        var path = window.location.pathname;
+        var breadcrumbs = document.getElementById("breadcrumbs");
+        var segments = path.split("/").filter(Boolean);
+        var titleEl = document.getElementById("page-title");
+
+        if (breadcrumbs) {
+            var breadcrumbHtml = '<a href="/">' + t("home") + '</a>';
+            var accum = "/";
+            segments.forEach(function(seg, idx) {
+                accum += seg + "/";
+                var isLast = idx === segments.length - 1;
+                breadcrumbHtml += ' / ' + (isLast ? '<span>' + decodeURIComponent(seg) + '</span>' : '<a href="' + accum + '">' + decodeURIComponent(seg) + '</a>');
+            });
+            breadcrumbs.innerHTML = breadcrumbHtml;
+        }
+
+        if (titleEl) {
+            titleEl.textContent = segments.length > 0 
+                ? decodeURIComponent(segments[segments.length - 1]) 
+                : t("pageTitle");
+        }
+
+        // Search Input placeholder
+        var searchInput = document.getElementById("search");
+        if (searchInput) {
+            searchInput.placeholder = t("searchPlaceholder");
+        }
+
+        // Footer text
+        var footerEl = document.getElementById("footer-text");
+        if (footerEl) {
+            footerEl.innerHTML = t("footerText");
+        }
+
+        // File List Cards
+        if (!list) return;
+
+        if (parsedItems.length === 0) {
+            list.innerHTML = '<div class="empty-state">' + t("noFiles") + '</div>';
+            return;
+        }
+
+        list.innerHTML = "";
+        parsedItems.forEach(function(item) {
+            var card = document.createElement("div");
+            card.className = "file-item";
+            
+            var displayName = item.isParent ? t("parentDir") : item.name;
+            card.dataset.name = displayName.toLowerCase();
+
+            var sizeDisplay = item.rawSize;
+            if (sizeDisplay === "-" || item.isDir) {
+                sizeDisplay = item.isParent ? "" : t("folderBadge");
+            }
+
+            var metaParts = [];
+            if (item.date) metaParts.push(item.date);
+            if (sizeDisplay && sizeDisplay !== t("folderBadge")) metaParts.push(sizeDisplay);
+            var metaText = metaParts.join(" &bull; ");
+
+            var iconHtml = item.isParent ? icons.parent : getIcon(item.name, item.isDir);
+
+            if (item.isDir) {
+                card.innerHTML = 
+                    '<a href="' + item.url + '" class="name-wrapper" style="text-decoration:none; color:inherit;">' +
+                        '<span class="file-icon">' + iconHtml + '</span>' +
+                        '<div class="file-details">' +
+                            '<span class="file-title">' + displayName + '</span>' +
+                            (metaText ? '<span class="file-meta">' + metaText + '</span>' : '') +
+                        '</div>' +
+                    '</a>' +
+                    '<div class="file-action">' +
+                        '<span class="badge-folder">' + (item.isParent ? t("upBadge") : t("folderBadge")) + '</span>' +
+                    '</div>';
+            } else {
+                card.innerHTML = 
+                    '<div class="name-wrapper">' +
+                        '<span class="file-icon">' + iconHtml + '</span>' +
+                        '<div class="file-details">' +
+                            '<span class="file-title">' + displayName + '</span>' +
+                            (metaText ? '<span class="file-meta">' + metaText + '</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="file-action">' +
+                        '<a href="' + item.url + '" download class="download-btn">' + t("download") + '</a>' +
+                    '</div>';
+            }
+
+            list.appendChild(card);
+        });
+
+        // Re-apply existing search query if any
+        if (searchInput && searchInput.value) {
+            var q = searchInput.value.toLowerCase().trim();
+            var allCards = Array.prototype.slice.call(list.querySelectorAll(".file-item"));
+            allCards.forEach(function(c) {
+                c.style.display = (!q || c.dataset.name.indexOf(q) !== -1) ? "flex" : "none";
+            });
+        }
+    }
+
+    renderUI();
+
+    /* 7. LIVE SEARCH FILTER */
+    var searchInput = document.getElementById("search");
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            var query = searchInput.value.toLowerCase().trim();
+            var cards = Array.prototype.slice.call(list.querySelectorAll(".file-item"));
+            cards.forEach(function(card) {
+                var matches = !query || card.dataset.name.indexOf(query) !== -1;
+                card.style.display = matches ? "flex" : "none";
+            });
+        });
+    }
+})();
+</script>
+</body>
+</html>

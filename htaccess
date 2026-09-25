@@ -1,0 +1,31 @@
+RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE]
+
+Header always set Content-Security-Policy "upgrade-insecure-requests;"
+
+# Character encoding
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html
+
+# Enable directory listing
+Options +Indexes
+IndexOptions FancyIndexing VersionSort NameWidth=* SuppressDescription SuppressRules SuppressHTMLPreamble HTMLTable Charset=UTF-8
+HeaderName /header.html
+ReadmeName /footer.html
+IndexIgnore .htaccess header.html footer.html list.html tinyindex.html translations.js favicon.svg *.md .gemini .git
+DirectoryIndex disabled
+
+# --- CRITICAL FIX ---
+# If ?autoindex is present, DO NOT serve index.html
+# (Superseded by native HeaderName / ReadmeName autoindex theming)
+
+# Treat .dic files as binary
+AddType application/octet-stream dic
+
+<FilesMatch "\.(mov|mp3|jpg|pdf|dic|txt)$">
+    ForceType application/octet-stream
+    Header set Content-Disposition attachment
+</FilesMatch>
