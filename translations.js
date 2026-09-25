@@ -57,3 +57,27 @@ rootScope.getDirectoryLanguage = function() {
     }
     return "en";
 };
+
+/**
+ * Directory listing configuration.
+ * - DIR_SUBFOLDER: Subfolder path (e.g. "/downloads" or "/tools/resources").
+ *                  Leave as empty string "" if running at domain root (e.g. https://res.sng.al/).
+ */
+rootScope.DIR_SUBFOLDER = "";
+
+rootScope.DIR_CONFIG = {
+    subfolder: (typeof rootScope.DIR_SUBFOLDER === "string") ? rootScope.DIR_SUBFOLDER : ""
+};
+
+/**
+ * Helper to get normalized base path (leading slash, no trailing slash, or empty string for root).
+ */
+rootScope.getDirectoryBase = function() {
+    var sub = rootScope.DIR_SUBFOLDER || (rootScope.DIR_CONFIG && rootScope.DIR_CONFIG.subfolder) || "";
+    if (typeof sub === "string" && sub !== "") {
+        if (sub === "/") return "";
+        return (sub.charAt(0) !== "/" ? "/" + sub : sub).replace(/\/+$/, "");
+    }
+    return (typeof window !== "undefined" && window.DIR_AUTO_BASE) || "";
+};
+

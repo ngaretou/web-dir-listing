@@ -7,7 +7,7 @@
 
 <!-- SVG Favicon (Embedded data URI + fallback) -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'%3E%3Cpath d='M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E">
-<link rel="alternate icon" href="/favicon.svg">
+<link rel="alternate icon" href="favicon.svg">
 
 <style>
     :root {
@@ -408,8 +408,51 @@
     }
 </style>
 
-<!-- Load Translations File -->
-<script src="/translations.js"></script>
+<!-- Load Translations File with Dynamic Path Resolution -->
+<script>
+(function() {
+    var pathname = window.location.pathname;
+    var segments = pathname.split("/").filter(Boolean);
+    
+    // Build candidate paths starting from current folder and walking up parent directories
+    var candidates = [];
+    var prefix = "";
+    
+    // Check current directory first
+    candidates.push("translations.js");
+    
+    // Then check parent directories: ../translations.js, ../../translations.js, etc.
+    for (var i = 0; i < segments.length; i++) {
+        prefix += "../";
+        candidates.push(prefix + "translations.js");
+    }
+    candidates.push("/translations.js");
+
+    function tryLoad(idx) {
+        if (idx >= candidates.length) {
+            window.dispatchEvent(new CustomEvent("dir-translations-ready"));
+            return;
+        }
+        var s = document.createElement("script");
+        s.src = candidates[idx];
+        s.onload = function() {
+            try {
+                var resolved = new URL(s.src, window.location.href);
+                var basePath = resolved.pathname.replace(/\/translations\.js$/, "");
+                if (basePath === "/") basePath = "";
+                window.DIR_AUTO_BASE = basePath;
+            } catch (e) {}
+            window.dispatchEvent(new CustomEvent("dir-translations-ready"));
+        };
+        s.onerror = function() {
+            if (s.parentNode) s.parentNode.removeChild(s);
+            tryLoad(idx + 1);
+        };
+        document.head.appendChild(s);
+    }
+    tryLoad(0);
+})();
+</script>
 
 <script>
     // Apply theme immediately to prevent flash of wrong theme

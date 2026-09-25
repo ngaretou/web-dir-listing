@@ -1,40 +1,25 @@
 </div> <!-- End #raw-listing -->
 
-<footer id="footer-text">&copy; 2026 &mdash; Foundational LLC &mdash; res.sng.al</footer>
+<footer id="footer-text"></footer>
 
 <script>
 (function() {
     /* 1. I18N / TRANSLATIONS HELPER */
-    var defaultDict = {
-        en: {
-            _name: "English",
-            pageTitle: "Resources",
-            home: "Home",
-            searchPlaceholder: "Search files...",
-            loading: "Loading resources...",
-            noFiles: "No files found in this directory.",
-            folderBadge: "Folder",
-            parentDir: "Parent Directory",
-            upBadge: "Up",
-            download: "Download",
-            footerText: "\u00A9 2026 \u2014 Foundational LLC \u2014 res.sng.al"
-        },
-        fr: {
-            _name: "Fran\u00E7ais",
-            pageTitle: "Ressources",
-            home: "Accueil",
-            searchPlaceholder: "Rechercher des fichiers...",
-            loading: "Chargement des ressources...",
-            noFiles: "Aucun fichier trouv\u00E9 dans ce dossier.",
-            folderBadge: "Dossier",
-            parentDir: "Dossier parent",
-            upBadge: "Retour",
-            download: "T\u00E9l\u00E9charger",
-            footerText: "\u00A9 2026 \u2014 Foundational LLC \u2014 res.sng.al"
-        }
+    var fallbackDict = {
+        _name: "English",
+        pageTitle: "Resources",
+        home: "Home",
+        searchPlaceholder: "Search files...",
+        loading: "Loading resources...",
+        noFiles: "No files found in this directory.",
+        folderBadge: "Folder",
+        parentDir: "Parent Directory",
+        upBadge: "Up",
+        download: "Download",
+        footerText: "\u00A9 2026 \u2014 Foundational LLC \u2014 res.sng.al"
     };
 
-    var dict = (typeof window !== "undefined" && window.DIR_TRANSLATIONS) || defaultDict;
+    var dict = (typeof window !== "undefined" && window.DIR_TRANSLATIONS) || {};
 
     var currentLang = "en";
     try {
@@ -46,9 +31,25 @@
     } catch (e) {}
 
     function t(key) {
-        var langData = dict[currentLang] || dict.en || defaultDict.en;
-        return langData[key] || defaultDict.en[key] || "";
+        var langData = dict[currentLang] || dict.en || fallbackDict;
+        return langData[key] || fallbackDict[key] || "";
     }
+
+    /* Base path resolution for subfolder or root installs */
+    var base = "";
+    function resolveBase() {
+        try {
+            if (typeof window.getDirectoryBase === "function") {
+                base = window.getDirectoryBase();
+            } else if (typeof window.DIR_SUBFOLDER === "string" && window.DIR_SUBFOLDER !== "") {
+                base = window.DIR_SUBFOLDER.replace(/\/+$/, "");
+                if (base && base.charAt(0) !== "/") base = "/" + base;
+            } else if (typeof window.DIR_AUTO_BASE === "string") {
+                base = window.DIR_AUTO_BASE;
+            }
+        } catch (e) {}
+    }
+    resolveBase();
 
     /* 2. CLEAN SVG ICONS */
     var icons = {
@@ -195,6 +196,13 @@
             }
 
             var isParent = rawName === "Parent Directory" || href === "/" || href.endsWith("/../") || href === "..";
+
+            // Suppress Parent Directory link if already at the root of the subfolder/listing
+            var currentPath = window.location.pathname.replace(/\/+$/, "");
+            if (isParent && currentPath === base) {
+                return;
+            }
+
             var isDir = isParent || href.endsWith("/") || rawName.endsWith("/");
             var displayName = isParent ? "" : rawName.replace(/\/$/, "");
 
@@ -250,12 +258,19 @@
         // Breadcrumbs & Title
         var path = window.location.pathname;
         var breadcrumbs = document.getElementById("breadcrumbs");
-        var segments = path.split("/").filter(Boolean);
+        var homeUrl = base ? (base + "/") : "/";
+
+        // Strip subfolder prefix so breadcrumbs and titles are relative to the listing root
+        var relPath = path;
+        if (base && relPath.indexOf(base) === 0) {
+            relPath = relPath.substring(base.length);
+        }
+        var segments = relPath.split("/").filter(Boolean);
         var titleEl = document.getElementById("page-title");
 
         if (breadcrumbs) {
-            var breadcrumbHtml = '<a href="/">' + t("home") + '</a>';
-            var accum = "/";
+            var breadcrumbHtml = '<a href="' + homeUrl + '">' + t("home") + '</a>';
+            var accum = base ? (base + "/") : "/";
             segments.forEach(function(seg, idx) {
                 accum += seg + "/";
                 var isLast = idx === segments.length - 1;
@@ -350,6 +365,19 @@
     }
 
     renderUI();
+
+    // Listen for translations readiness in case translations.js was loaded asynchronously
+    window.addEventListener("dir-translations-ready", function() {
+        dict = (typeof window !== "undefined" && window.DIR_TRANSLATIONS) || {};
+        try {
+            if (typeof window.getDirectoryLanguage === "function") {
+                currentLang = window.getDirectoryLanguage();
+            }
+        } catch (e) {}
+        resolveBase();
+        setupCustomDropdown();
+        renderUI();
+    });
 
     /* 7. LIVE SEARCH FILTER */
     var searchInput = document.getElementById("search");

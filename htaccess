@@ -4,6 +4,10 @@ RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE]
 
+# Route translations.js and favicon.svg to directory listing root for any subfolder depth
+RewriteRule (^|/)translations\.js$ translations.js [L]
+RewriteRule (^|/)favicon\.svg$ favicon.svg [L]
+
 Header always set Content-Security-Policy "upgrade-insecure-requests;"
 
 # Character encoding
