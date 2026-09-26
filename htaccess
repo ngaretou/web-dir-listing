@@ -16,15 +16,16 @@ AddCharset UTF-8 .html
 
 # Enable directory listing
 Options +Indexes
-IndexOptions FancyIndexing VersionSort NameWidth=* SuppressDescription SuppressRules SuppressHTMLPreamble HTMLTable Charset=UTF-8
+IndexOptions FancyIndexing VersionSort NameWidth=* DescriptionWidth=* SuppressRules SuppressHTMLPreamble HTMLTable Charset=UTF-8
 HeaderName /header.html
 ReadmeName /footer.html
 IndexIgnore .htaccess header.html footer.html list.html tinyindex.html translations.js favicon.svg *.md .gemini .git
 DirectoryIndex disabled
 
-# --- CRITICAL FIX ---
-# If ?autoindex is present, DO NOT serve index.html
-# (Superseded by native HeaderName / ReadmeName autoindex theming)
+# Descriptions for folders and files (AddDescription "Description Text" filename_or_dirname/)
+# Examples:
+# AddDescription "Jigeen yi ak Yàlla" jay/
+# AddDescription "Complete Wolof Audio Collection" acc.zip
 
 # Treat .dic files as binary
 AddType application/octet-stream dic

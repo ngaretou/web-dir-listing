@@ -208,22 +208,45 @@
 
             var date = "";
             var size = "";
+            var description = "";
 
             var tr = a.closest("tr");
             if (tr) {
                 var tds = Array.prototype.slice.call(tr.querySelectorAll("td"));
-                if (tds.length >= 3) {
-                    date = (tds[tds.length - 3] && tds[tds.length - 3].textContent || "").trim();
-                    size = (tds[tds.length - 2] && tds[tds.length - 2].textContent || "").trim();
+                var nameTd = a.closest("td");
+                var nameIdx = tds.indexOf(nameTd);
+
+                if (nameIdx !== -1) {
+                    // Apache HTMLTable column layout relative to the name cell:
+                    // nameIdx + 1: Last modified date
+                    // nameIdx + 2: File size
+                    // nameIdx + 3: Description (if AddDescription is used & not suppressed)
+                    if (tds[nameIdx + 1]) {
+                        var d = tds[nameIdx + 1].textContent.replace(/\u00A0/g, " ").trim();
+                        if (d && d !== "-" && d !== " - ") date = d;
+                    }
+                    if (tds[nameIdx + 2]) {
+                        var s = tds[nameIdx + 2].textContent.replace(/\u00A0/g, " ").trim();
+                        if (s && s !== "-" && s !== " - ") size = s;
+                    }
+                    if (tds[nameIdx + 3]) {
+                        var desc = tds[nameIdx + 3].textContent.replace(/\u00A0/g, " ").trim();
+                        if (desc && desc !== "-" && desc !== " - ") description = desc;
+                    }
                 }
             } else {
                 var textNode = a.nextSibling;
                 if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                    var text = textNode.textContent.trim();
-                    var match = text.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\s+([0-9\.\-A-Za-z]+)/);
+                    var text = textNode.textContent.replace(/\u00A0/g, " ").trim();
+                    var match = text.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\s+([0-9\.\-A-Za-z]+)(?:\s+(.*))?$/);
                     if (match) {
-                        date = match[1];
-                        size = match[2];
+                        date = match[1].trim();
+                        var sRaw = match[2].trim();
+                        if (sRaw && sRaw !== "-") size = sRaw;
+                        if (match[3]) {
+                            var descRaw = match[3].trim();
+                            if (descRaw && descRaw !== "-") description = descRaw;
+                        }
                     }
                 }
             }
@@ -235,7 +258,8 @@
                 isDir: isDir,
                 isParent: isParent,
                 date: date,
-                rawSize: size
+                rawSize: size,
+                description: description
             });
         });
 
@@ -311,7 +335,8 @@
             card.className = "file-item";
             
             var displayName = item.isParent ? t("parentDir") : item.name;
-            card.dataset.name = displayName.toLowerCase();
+            var searchTerms = (displayName + " " + (item.description || "")).toLowerCase();
+            card.dataset.name = searchTerms;
 
             var sizeDisplay = item.rawSize;
             if (sizeDisplay === "-" || item.isDir) {
@@ -324,6 +349,7 @@
             var metaText = metaParts.join(" &bull; ");
 
             var iconHtml = item.isParent ? icons.parent : getIcon(item.name, item.isDir);
+            var descHtml = item.description ? '<span class="file-desc">' + item.description + '</span>' : '';
 
             if (item.isDir) {
                 card.innerHTML = 
@@ -331,6 +357,7 @@
                         '<span class="file-icon">' + iconHtml + '</span>' +
                         '<div class="file-details">' +
                             '<span class="file-title">' + displayName + '</span>' +
+                            descHtml +
                             (metaText ? '<span class="file-meta">' + metaText + '</span>' : '') +
                         '</div>' +
                     '</a>' +
@@ -343,6 +370,7 @@
                         '<span class="file-icon">' + iconHtml + '</span>' +
                         '<div class="file-details">' +
                             '<span class="file-title">' + displayName + '</span>' +
+                            descHtml +
                             (metaText ? '<span class="file-meta">' + metaText + '</span>' : '') +
                         '</div>' +
                     '</div>' +
