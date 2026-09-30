@@ -24,7 +24,7 @@ DirectoryIndex disabled
 
 # Descriptions for folders and files (AddDescription "Description Text" filename_or_dirname/)
 # Examples:
-# AddDescription "Jigeen yi ak Yàlla" jay/
+# AddDescription "Jigeen yi ak Yàlla" jay
 # AddDescription "Complete Wolof Audio Collection" acc.zip
 
 # Treat .dic files as binary

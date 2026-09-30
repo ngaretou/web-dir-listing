@@ -7,6 +7,13 @@ However, out of the box, Apache's default directory listings look like they were
 
 This project transforms standard Apache directory listings into a **sleek, modern, and accessible file browser** using pure client-side HTML, CSS, and Vanilla JavaScript—without altering your server-side files.
 
+## 👀 Examples in use: 
+
+http://res.sng.al
+
+http://kaddugyalla.com/ojo
+
+
 ---
 
 ## 💡 The Problem It Solves
@@ -66,7 +73,7 @@ Deploying takes just a couple of minutes. Choose the setup that matches your ser
 
 ---
 
-### B. Subfolder Deployment (e.g., `https://example.com/downloads/`)
+### B. Subfolder Deployment (e.g., `https://kaddugyalla.com/ojo`)
 
 1. **`translations.js`**:
    Set `DIR_SUBFOLDER` to your subfolder path (leading slash, no trailing slash):
@@ -83,13 +90,15 @@ Deploying takes just a couple of minutes. Choose the setup that matches your ser
 
 3. **`header.html` & `footer.html`**: No edits required.
 
+4. ***`htaccess` : rename to `.htaccess`. If you already have an .htaccess file, paste this htaccess file's contents below your current file's contents, and remove duplicate sections. 
+
 ---
 
 ## 🎨 Tips & Customization
 
 - **Add Descriptions:** Use Apache's native `AddDescription` directive in `.htaccess` to add metadata that shows up in search:
   ```apache
-  AddDescription "Wolof Language Audio Collection" audio/
+  AddDescription "Wolof Language Audio Collection" audio
   AddDescription "Annual Report 2026 (PDF)" report-2026.pdf
   ```
 - **Add a Language:** Add a new key (e.g., `es`, `de`) to `DIR_TRANSLATIONS` inside `translations.js`—the dropdown automatically populates it!
@@ -99,14 +108,4 @@ Deploying takes just a couple of minutes. Choose the setup that matches your ser
 ## 🤖 Built With Gemini 3.8 Flash
 
 This project was built with the assistance of **Gemini 3.8 Flash**, combining modern frontend patterns with lightweight, reliable Apache server conventions.
-
----
-
-## ❓ Examples in use: 
-http://res.sng.al
-
-http://kaddugyalla.com/ojo
-
-
-Happy sharing! 🚀
 
